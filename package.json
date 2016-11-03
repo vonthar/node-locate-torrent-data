@@ -1,6 +1,6 @@
 {
   "name": "locate-torrent-data",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Find the location of files that match the contents of a torrent file.",
   "keywords": [
     "bittorrent",
@@ -16,13 +16,13 @@
     "name": "vonthar",
     "email": "vonthar@tfwno.gf"
   },
-  "homepage": "https://github.com/vonthar/locate-torrent-data",
+  "homepage": "https://github.com/vonthar/node-locate-torrent-data",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/vonthar/locate-torrent-data.git"
+    "url": "git+https://github.com/vonthar/node-locate-torrent-data.git"
   },
   "bugs": {
-    "url": "https://github.com/vonthar/locate-torrent-data/issues"
+    "url": "https://github.com/vonthar/node-locate-torrent-data/issues"
   },
   "main": "src/locate.js",
   "scripts": {
