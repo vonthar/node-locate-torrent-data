@@ -1,0 +1,70 @@
+{
+  "name": "locate-torrent-data",
+  "version": "0.1.0",
+  "description": "Find the location of files that match the contents of a torrent file.",
+  "keywords": [
+    "bittorrent",
+    ".torrent",
+    "torrent",
+    "file",
+    "index",
+    "locate",
+    "search"
+  ],
+  "license": "MPL-2.0",
+  "author": {
+    "name": "vonthar",
+    "email": "vonthar@tfwno.gf"
+  },
+  "homepage": "https://github.com/vonthar/locate-torrent-data",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vonthar/locate-torrent-data.git"
+  },
+  "bugs": {
+    "url": "https://github.com/vonthar/locate-torrent-data/issues"
+  },
+  "main": "src/locate.js",
+  "scripts": {
+    "test": "nyc -n src/*.js tape test/*.js",
+    "coverage": "npm test && nyc report --reporter=text-lcov | coveralls",
+    "lint": "eslint -c node_modules/@vonthar/pkgdev/etc/eslintrc.json src/*.js",
+    "docs": "jsdoc2md -v -p list -r list --group-by kind -t node_modules/@vonthar/pkgdev/etc/jsdoc2md.hbs src/*.js > README.md",
+    "preversion": "npm test && git add .",
+    "postversion": "git push -u origin master && git push origin master --tags && npm publish"
+  },
+  "dependencies": {
+    "async": "^2.0.0-rc.4",
+    "cartesian": "^1.0.0",
+    "ht": "0.0.2",
+    "isstream": "^0.1.2",
+    "parse-torrent-file": "^3.3.8",
+    "private": "^0.1.6",
+    "simple-sha1": "^2.0.8",
+    "walkdir": "0.0.11"
+  },
+  "devDependencies": {
+    "@vonthar/pkgdev": "git+https://github.com/vonthar/pkgdev.git",
+    "coveralls": "^2.11.12",
+    "create-torrent": "^3.25.1",
+    "eslint": "^2.13.1",
+    "eslint-config-xo": "^0.15.3",
+    "fs-extra": "^0.30.0",
+    "nyc": "^8.1.0",
+    "random-string": "^0.1.2",
+    "tape": "^4.6.0"
+  },
+  "testling": {
+    "files": "test/*.js",
+    "browsers": [
+      "ie/6..latest",
+      "chrome/22..latest",
+      "firefox/16..latest",
+      "safari/latest",
+      "opera/11.0..latest",
+      "iphone/6",
+      "ipad/6",
+      "android-browser/latest"
+    ]
+  }
+}
