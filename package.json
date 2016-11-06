@@ -1,6 +1,6 @@
 {
   "name": "locate-torrent-data",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Find the location of files that match the contents of a torrent file.",
   "keywords": [
     "bittorrent",
@@ -36,9 +36,8 @@
   "dependencies": {
     "async": "^2.0.0-rc.4",
     "cartesian": "^1.0.0",
-    "ht": "0.0.2",
     "isstream": "^0.1.2",
-    "parse-torrent-file": "^3.3.8",
+    "parse-torrent-file": "^4.0.0",
     "private": "^0.1.6",
     "simple-sha1": "^2.0.8",
     "walkdir": "0.0.11"
@@ -49,7 +48,7 @@
     "create-torrent": "^3.25.1",
     "eslint": "^2.13.1",
     "eslint-config-xo": "^0.15.3",
-    "fs-extra": "^0.30.0",
+    "fs-extra": "^1.0.0",
     "nyc": "^8.1.0",
     "random-string": "^0.1.2",
     "tape": "^4.6.0"

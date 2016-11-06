@@ -85,13 +85,15 @@ tape("create fixtures", function (assert) {
 });
 
 tape("search incomplete index", function (assert) {
-  assert.plan(16);
+  assert.plan(17);
+  var notFound = 0;
   var fileIndex = locateTorrentData.index("data");
   fileIndex.on("match", function (file) {
     assert.equal(path.basename(file.path, ".txt"), path.basename(file.location, ".dat"));
   });
   fileIndex.on("notFound", function (file) {
     assert.ok(file.path);
+    notFound++;
   });
   fileIndex.on("error", function (error) {
     assert.error(error);
@@ -99,11 +101,11 @@ tape("search incomplete index", function (assert) {
   fileIndex.on("end", function (files, torrent) {
     assert.equal(files.length, 13);
     assert.equal(torrent.files.length, 13);
+    assert.equal(notFound, 5);
   });
   fileIndex.search(fs.readFileSync("test.torrent"));
   fileIndex.save("index.csv", function (error) {
     assert.error(error);
-    assert.end();
   });
 });
 
@@ -129,9 +131,40 @@ tape("search complete index", function (assert) {
   });
 });
 
+tape("test remove", function (assert) {
+  assert.plan(3);
+  var fileIndex = locateTorrentData.index("data", { maxdepth: 1 });
+  fileIndex.search("test.torrent", function (error, files) {
+    assert.equal(count(files), 4);
+  });
+  fileIndex.add([ "data/subdir", "data/subdir2" ]);
+  fileIndex.search("test.torrent", function (error, files) {
+    assert.equal(count(files), 13);
+  });
+  fileIndex.remove([ "data/subdir", "data/subdir2" ]);
+  fileIndex.search("test.torrent", function (error, files) {
+    assert.equal(count(files), 4);
+  });
+});
+
+tape("foreach remove", function (assert) {
+  assert.plan(3);
+  var fileIndex = locateTorrentData.index("data");
+  fileIndex.search("test.torrent", function (file, done) {
+    if (file.name === "file3.txt") {
+      fs.remove(file.location, done);
+      assert.pass();
+      return;
+    }
+    done();
+  }, function (error, files) {
+    assert.error(error);
+    assert.equal(count(files), 13);
+  });
+});
+
 tape("search error", function (assert) {
   assert.plan(4);
-  fs.removeSync("data/file3.dat");
   var fileIndex = locateTorrentData.load(fs.createReadStream("index.csv"));
   fileIndex.on("error", function (error) {
     assert.ok(error);
@@ -178,4 +211,18 @@ tape("index error", function (assert) {
     assert.ok(error);
   });
 });
+
+/*tape.onFinish(function () {
+  process.chdir(__dirname);
+  fs.removeSync("fixtures");
+});*/
+
+function count(files) {
+  return files.reduce(function (count, file) {
+    if (file.location) {
+      return count + 1;
+    }
+    return count;
+  }, 0);
+}
 

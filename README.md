@@ -30,19 +30,20 @@ API Reference
 -------------
 
 * [locate-torrent-data](#module_locate-torrent-data)
-    * [.index(source, [options], [callback])](#module_locate-torrent-data.index) ⇒ <code>[FileIndex](#FileIndex)</code>
+    * [.index(path, [options], [callback])](#module_locate-torrent-data.index) ⇒ <code>[FileIndex](#FileIndex)</code>
     * [.load(source, [callback])](#module_locate-torrent-data.load) ⇒ <code>[FileIndex](#FileIndex)</code>
 
 <a name="module_locate-torrent-data.index"></a>
 
-### locate-torrent-data.index(source, [options], [callback]) ⇒ <code>[FileIndex](#FileIndex)</code>
+### locate-torrent-data.index(path, [options], [callback]) ⇒ <code>[FileIndex](#FileIndex)</code>
 Create a searchable file index from the contents of specified folder(s).
 
 **Kind**: static method of <code>[locate-torrent-data](#module_locate-torrent-data)</code>  
 **Chainable**  
+**Emits**: <code>[error](#FileIndex+event_error)</code>, <code>[update](#FileIndex+event_update)</code>  
 **Params**
 
-- source <code>string</code> | <code>Array.&lt;string&gt;</code>
+- path <code>string</code> | <code>Array.&lt;string&gt;</code>
 - [options] <code>Object</code>
     - [.maxdepth] <code>number</code>
     - [.dereference] <code>boolean</code>
@@ -62,6 +63,7 @@ Import a file index from disk or read from specified stream.
 
 **Kind**: static method of <code>[locate-torrent-data](#module_locate-torrent-data)</code>  
 **Chainable**  
+**Emits**: <code>[error](#FileIndex+event_error)</code>, <code>[update](#FileIndex+event_update)</code>  
 **See**: [save](#FileIndex+save)  
 **Params**
 
@@ -78,13 +80,13 @@ var fileIndex = locateTorrentData.load("~/fileindex.csv");
 
 ## FileIndex
 **Kind**: global class  
-**Emits**: <code>[error](#FileIndex+event_error)</code>, <code>[match](#FileIndex+event_match)</code>, <code>[notFound](#FileIndex+event_notFound)</code>, <code>[end](#FileIndex+event_end)</code>, <code>[update](#FileIndex+event_update)</code>  
 
 * [FileIndex](#FileIndex)
     * _function_
-        * [.search(torrent, [onMatch], [callback])](#FileIndex+search) ⇒ <code>[FileIndex](#FileIndex)</code>
+        * [.search(torrent, [forEach], [callback])](#FileIndex+search) ⇒ <code>[FileIndex](#FileIndex)</code>
         * [.on(event, callback)](#FileIndex+on) ⇒ <code>[FileIndex](#FileIndex)</code>
-        * [.add(source, [options], [callback])](#FileIndex+add) ⇒ <code>[FileIndex](#FileIndex)</code>
+        * [.add(path, [options], [callback])](#FileIndex+add) ⇒ <code>[FileIndex](#FileIndex)</code>
+        * [.remove(path, [callback])](#FileIndex+remove) ⇒ <code>[FileIndex](#FileIndex)</code>
         * [.save(destination, [callback])](#FileIndex+save) ⇒ <code>[FileIndex](#FileIndex)</code>
     * _event_
         * ["error" (error)](#FileIndex+event_error)
@@ -95,15 +97,16 @@ var fileIndex = locateTorrentData.load("~/fileindex.csv");
 
 <a name="FileIndex+search"></a>
 
-### fileIndex.search(torrent, [onMatch], [callback]) ⇒ <code>[FileIndex](#FileIndex)</code>
+### fileIndex.search(torrent, [forEach], [callback]) ⇒ <code>[FileIndex](#FileIndex)</code>
 Search file index for files that match the contents of specified torrent.
 
 **Kind**: instance method of <code>[FileIndex](#FileIndex)</code>  
 **Chainable**  
+**Emits**: <code>[error](#FileIndex+event_error)</code>, <code>[match](#FileIndex+event_match)</code>, <code>[notFound](#FileIndex+event_notFound)</code>, <code>[end](#FileIndex+event_end)</code>, <code>[update](#FileIndex+event_update)</code>  
 **Params**
 
 - torrent <code>string</code> | <code>[ParsedTorrent](https://www.npmjs.com/package/parse-torrent-file)</code>
-- [onMatch] <code>function</code>
+- [forEach] <code>function</code>
     - .file <code>[TorrentFile](#TorrentFile)</code>
     - .callback <code>function</code>
 - [callback] <code>function</code>
@@ -176,25 +179,44 @@ fs.readdirSync(torrentPath).forEach(function (file) {
  
 <a name="FileIndex+add"></a>
 
-### fileIndex.add(source, [options], [callback]) ⇒ <code>[FileIndex](#FileIndex)</code>
+### fileIndex.add(path, [options], [callback]) ⇒ <code>[FileIndex](#FileIndex)</code>
 Add contents of specified folder(s) to the file index.
 
 **Kind**: instance method of <code>[FileIndex](#FileIndex)</code>  
 **Chainable**  
+**Emits**: <code>[error](#FileIndex+event_error)</code>, <code>[update](#FileIndex+event_update)</code>  
 **Params**
 
-- source <code>string</code> | <code>Array.&lt;string&gt;</code>
+- path <code>string</code> | <code>Array.&lt;string&gt;</code>
 - [options] <code>Object</code>
     - [.maxdepth] <code>number</code>
     - [.dereference] <code>boolean</code>
 - [callback] <code>function</code>
     - .error <code>Error</code>
-    - .fileIndex <code>[FileIndex](#FileIndex)</code>
 
 **Example**  
 ```js
 var fileIndex = locateTorrentData.index("D:\\Files");
 fileIndex.add("D:\\Files2");
+```
+ 
+<a name="FileIndex+remove"></a>
+
+### fileIndex.remove(path, [callback]) ⇒ <code>[FileIndex](#FileIndex)</code>
+Remove contents of specified folder(s) from the file index.
+
+**Kind**: instance method of <code>[FileIndex](#FileIndex)</code>  
+**Chainable**  
+**Emits**: <code>[update](#FileIndex+event_update)</code>  
+**Params**
+
+- path <code>string</code> | <code>Array.&lt;string&gt;</code>
+- [callback] <code>function</code>
+
+**Example**  
+```js
+var fileIndex = locateTorrentData.index("D:\\Files");
+fileIndex.remove("D:\\Files\\Secret Files");
 ```
  
 <a name="FileIndex+save"></a>
@@ -204,6 +226,7 @@ Export file index as csv file to disk at specified path or write to specified st
 
 **Kind**: instance method of <code>[FileIndex](#FileIndex)</code>  
 **Chainable**  
+**Emits**: <code>[error](#FileIndex+event_error)</code>  
 **See**: [load](#module_locate-torrent-data.load)  
 **Params**
 

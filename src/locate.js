@@ -1,12 +1,12 @@
 "use strict";
 
 var fs = require("fs");
+var path = require("path");
 var util = require("../lib/util.js");
 var EventEmitter = require("events").EventEmitter;
 var async = require("async");
 var walkDir = require("walkdir");
 var getPrivate = require("private").makeAccessor();
-var HashTable = require("ht");
 var parseTorrentFile = require("parse-torrent-file");
 var sha1 = require("simple-sha1");
 var isStream = require("isstream");
@@ -31,14 +31,15 @@ var cartesianProduct = require("cartesian");
  *//**
  * @function index
  * @memberof module:locate-torrent-data
- * @param {(string|Array.<string>)} source
+ * @param {(string|Array.<string>)} path
  * @param {Object=} options
  * @param {number=} options.maxdepth
  * @param {boolean=} options.dereference
  * @param {function=} callback
  * @param {Error} callback.error
- * @param {FileIndex} callback.fileIndex
  * @returns {FileIndex}
+ * @emits FileIndex#error
+ * @emits FileIndex#update
  * @chainable
  * @description
  * Create a searchable file index from the contents of specified folder(s).
@@ -52,8 +53,9 @@ var cartesianProduct = require("cartesian");
  * @param {(string|Readable)} source
  * @param {function=} callback
  * @param {Error} callback.error
- * @param {FileIndex} callback.fileIndex
  * @returns {FileIndex}
+ * @emits FileIndex#error
+ * @emits FileIndex#update
  * @chainable
  * @see {@link FileIndex#save}
  * @description
@@ -65,9 +67,9 @@ var cartesianProduct = require("cartesian");
  */
 Object.defineProperties(module.exports, {
   index: {
-    value: function (source, options, callback) {
+    value: function (pathList, options, callback) {
       var fileIndex = createFileIndex();
-      fileIndex.add(source, options, callback);
+      fileIndex.add(pathList, options, callback);
       return fileIndex;
     }
   },
@@ -97,11 +99,6 @@ Object.defineProperties(module.exports, {
 /**
  * @class FileIndex
  * @global
- * @fires FileIndex#error
- * @fires FileIndex#match
- * @fires FileIndex#notFound
- * @fires FileIndex#end
- * @fires FileIndex#update
  *//**
  * @event error
  * @memberof FileIndex.prototype
@@ -133,13 +130,18 @@ Object.defineProperties(module.exports, {
  * @function search
  * @memberof FileIndex.prototype
  * @param {(string|external:ParsedTorrent)} torrent
- * @param {function=} onMatch
- * @param {TorrentFile} onMatch.file
- * @param {function} onMatch.callback
+ * @param {function=} forEach
+ * @param {TorrentFile} forEach.file
+ * @param {function} forEach.callback
  * @param {function=} callback
  * @param {Error} callback.error
  * @param {Array.<TorrentFile>} callback.files
  * @returns {FileIndex}
+ * @emits FileIndex#error
+ * @emits FileIndex#match
+ * @emits FileIndex#notFound
+ * @emits FileIndex#end
+ * @emits FileIndex#update
  * @chainable
  * @description
  * Search file index for files that match the contents of specified torrent.
@@ -205,14 +207,15 @@ Object.defineProperties(module.exports, {
  *//**
  * @function add
  * @memberof FileIndex.prototype
- * @param {(string|Array.<string>)} source
+ * @param {(string|Array.<string>)} path
  * @param {Object=} options
  * @param {number=} options.maxdepth
  * @param {boolean=} options.dereference
  * @param {function=} callback
  * @param {Error} callback.error
- * @param {FileIndex} callback.fileIndex
  * @returns {FileIndex}
+ * @emits FileIndex#error
+ * @emits FileIndex#update
  * @chainable
  * @description
  * Add contents of specified folder(s) to the file index.
@@ -222,12 +225,28 @@ Object.defineProperties(module.exports, {
  * fileIndex.add("D:\\Files2");
  * ```
  *//**
+ * @function remove
+ * @memberof FileIndex.prototype
+ * @param {(string|Array.<string>)} path
+ * @param {function=} callback
+ * @returns {FileIndex}
+ * @emits FileIndex#update
+ * @chainable
+ * @description
+ * Remove contents of specified folder(s) from the file index.
+ * @example
+ * ```js
+ * var fileIndex = locateTorrentData.index("D:\\Files");
+ * fileIndex.remove("D:\\Files\\Secret Files");
+ * ```
+ *//**
  * @function save
  * @memberof FileIndex.prototype
  * @param {(string|Writable)} destination
  * @param {function=} callback
  * @param {Error} callback.error
  * @returns {FileIndex}
+ * @emits FileIndex#error
  * @chainable
  * @see {@link module:locate-torrent-data.load}
  * @description
@@ -240,11 +259,11 @@ Object.defineProperties(module.exports, {
 var FileIndex = {};
 Object.defineProperties(FileIndex, {
   search: {
-    value: function (torrent, onMatch, callback) {
+    value: function (torrent, forEach, callback) {
       var self = getPrivate(this);
       if (typeof callback !== "function") {
-        callback = onMatch;
-        onMatch = null;
+        callback = forEach;
+        forEach = null;
       }
       var parsedTorrent;
       if (typeof callback !== "function") {
@@ -285,7 +304,7 @@ Object.defineProperties(FileIndex, {
       self.queue.push({
         action: "search",
         parsedTorrent: parsedTorrent,
-        onMatch: onMatch
+        forEach: forEach
       }, callback);
       return this;
     }
@@ -298,8 +317,12 @@ Object.defineProperties(FileIndex, {
     }
   },
   add: {
-    value: function (source, options, callback) {
+    value: function (pathList, options, callback) {
       var self = getPrivate(this);
+      if (typeof options === "function") {
+        callback = options;
+        options = null;
+      }
       if (typeof callback !== "function") {
         callback = function (error) {
           if (error) {
@@ -311,10 +334,24 @@ Object.defineProperties(FileIndex, {
       }
       self.queue.push({
         action: "add",
-        source: source,
+        pathList: [].concat(pathList),
         options: options
       }, callback);
       return this;
+    }
+  },
+  remove: {
+    value: function (pathList, callback) {
+      var self = getPrivate(this);
+      if (typeof callback !== "function") {
+        callback = function () {
+          self.emitter.emit("update");
+        };
+      }
+      self.queue.push({
+        action: "remove",
+        pathList: pathList,
+      }, callback);
     }
   },
   save: {
@@ -404,8 +441,13 @@ function processTask(self, task, callback) {
   switch (task.action) {
     case "search":
       locateFiles(self.fileTable, task.parsedTorrent, function (file, done) {
-        if (task.onMatch) {
-          task.onMatch(file, done);
+        if (task.forEach) {
+          task.forEach(file, function () {
+            if (!fs.existsSync(file.location)) {
+              self.fileTable.remove(file.location);
+            }
+            done();
+          });
           return;
         }
         self.emitter.emit("match", file, task.parsedTorrent);
@@ -425,20 +467,41 @@ function processTask(self, task, callback) {
         }
         self.fileTable = fileTable;
         self.queue.resume();
-        callback(null, fileTable);
+        callback(null);
       });
       return;
     case "add":
+    case "remove":
       self.queue.pause();
-      buildFileTable(task.source, task.options, function (error, fileTable) {
+      if (self.fileTable) {
+        var pathList = task.pathList.map(function (item) {
+          return path.resolve(item) + path.sep;
+        });
+        self.fileTable = self.fileTable.filter(function (size, location) {
+          return !pathList.some(function (value) {
+            return location.startsWith(value);
+          });
+        });
+      }
+      if (task.action === "remove") {
+        self.queue.resume();
+        callback();
+        return;
+      }
+      buildFileTable(task.pathList, task.options, function (error, fileTable) {
         if (error) {
           self.queue.resume();
           callback(error);
           return;
         }
-        self.fileTable = util.hashTableUnion(self.fileTable, fileTable);
+        if (self.fileTable) {
+          self.fileTable.merge(fileTable);
+        }
+        else {
+          self.fileTable = fileTable;
+        }
         self.queue.resume();
-        callback(null, fileTable);
+        callback(null);
       });
       return;
     default:
@@ -448,27 +511,23 @@ function processTask(self, task, callback) {
 
 /**
  * @private
- * @param {(string|Array.<string>)} pathList
+ * @param {Array.<string>} pathList
  * @param {Object=} options
  * @param {number} options.maxdepth
  * @param {boolean} options.dereference
  * @param {function} callback
  * @param {Error} callback.error
- * @param {HashTable=} callback.fileTable
+ * @param {FileTable=} callback.fileTable
  */
 function buildFileTable(pathList, options, callback) {
   if (!options) {
     options = {};
   }
-  if (typeof options === "function") {
-    callback = options;
-    options = {};
-  }
-  async.map([].concat(pathList), function (dirPath, callback) {
-    var fileTable = new HashTable();
-    var config = {};
-    config["max_depth"] = options.maxdepth;
-    config["follow_symlinks"] = options.dereference;
+  var config = {};
+  config["max_depth"] = options.maxdepth;
+  config["follow_symlinks"] = options.dereference;
+  async.map(pathList, function (dirPath, done) {
+    var fileTable = util.createFileTable();
     var filesStream = walkDir(dirPath, config);
     var error = null;
     filesStream.on("error", function (errorPath) {
@@ -479,16 +538,16 @@ function buildFileTable(pathList, options, callback) {
       fileTable.put(stats.size, filePath);
     });
     filesStream.on("end", function () {
-      callback(error, fileTable);
+      done(error, fileTable);
     });
   }, function (error, results) {
     if (error) {
       callback(error);
       return;
     }
-    var fileTable = new HashTable();
-    for (var i = results.length - 1; i > -1; i--) {
-      fileTable = fileTable.concat(results[i]);
+    var fileTable = results[0];
+    for (var i = 1; i < results.length; i++) {
+      fileTable.merge(results[i]);
     }
     callback(null, fileTable);
   });
@@ -500,10 +559,10 @@ function buildFileTable(pathList, options, callback) {
  * @param {(string|Readable)} source
  * @param {function} callback
  * @param {Error} callback.error
- * @param {HashTable=} callback.fileTable
+ * @param {FileTable=} callback.fileTable
  */
 function importFileTable(source, callback) {
-  var fileTable = new HashTable();
+  var fileTable = util.createFileTable();
   var readStream;
   if (isStream.isReadable(source)) {
     readStream = source;
@@ -534,7 +593,7 @@ function importFileTable(source, callback) {
 
 /**
  * @private
- * @param {HashTable} fileTable
+ * @param {FileTable} fileTable
  * @param {(string|Writable)} destination
  * @param {function} callback
  * @param {Error} callback.error
@@ -554,8 +613,8 @@ function exportFileTable(fileTable, destination, callback) {
   }
   writeStream.on("error", callback);
   writeStream.on("close", callback);
-  fileTable.forEach(function (item) {
-    writeStream.write(item.key + ",\"" + item.value + "\"" + eol);
+  fileTable.forEach(function (size, location) {
+    writeStream.write(size + ",\"" + location + "\"" + eol);
   });
   writeStream.end();
 }
@@ -566,14 +625,14 @@ function exportFileTable(fileTable, destination, callback) {
  * @private
  * @param {FileTable} fileTable
  * @param {external:ParsedTorrent} torrent
- * @param {function} onMatch
- * @param {TorrentFile} onMatch.file
- * @param {function} onMatch.callback
+ * @param {function} forEach
+ * @param {TorrentFile} forEach.file
+ * @param {function} forEach.callback
  * @param {function} callback
  * @param {Error} callback.error
  * @param {Array.<TorrentFile>} callback.files
  */
-function locateFiles(fileTable, torrent, onMatch, callback) {
+function locateFiles(fileTable, torrent, forEach, callback) {
   var previousPiece = {};
   async.eachOf(torrent.files, function (file, i, done) {
     if (!fileTable.contains(file.length)) {
@@ -601,14 +660,14 @@ function locateFiles(fileTable, torrent, onMatch, callback) {
           done(error);
           return;
         }
-        async.each(files, onMatch, done);
+        async.each(files, forEach, done);
       });
     }
   }, function (error) {
     callback(error, torrent.files);
   });
 }
- 
+
 
 /**
  * Finds the first TorrentPiece from a file
@@ -649,7 +708,7 @@ function getFirstPiece(torrent, fileIndex) {
  * @param {TorrentPiece} piece
  * @param {Array.<TorrentFile>} files
  * @param {number} fileIndex
- * @param {HashTable} fileTable
+ * @param {FileTable} fileTable
  * @return {TorrentPiece} The piece with added chunk data
  */
 function addChunkData(piece, files, fileIndex, fileTable) {
@@ -674,12 +733,12 @@ function addChunkData(piece, files, fileIndex, fileTable) {
   var chunkList = [];
   var noMatches;
   var file;
-  var findMatches = function (item) {
-    if (item.key === file.length) {
+  var findMatches = function (size, location) {
+    if (size === file.length) {
       noMatches = false;
       sizeMatches.push({
         chunkIndex: chunkList.length,
-        path: item.value
+        path: location
       });
     }
   };
@@ -688,7 +747,6 @@ function addChunkData(piece, files, fileIndex, fileTable) {
     noMatches = true;
     fileTable.forEach(findMatches);
     if (noMatches) {
-      //return null;
       continue;
     }
     var chunk = {};
@@ -757,7 +815,7 @@ function checkTorrentPiece(piece, callback) {
             files.push(chunk.file);
           }
           else if (chunk.file.location !== location) {
-            console.log("woops, same file different results");
+            throw new Error("woops, same file different results");
           }
         });
         callback(error, files);
