@@ -30,12 +30,12 @@ API Reference
 -------------
 
 * [locate-torrent-data](#module_locate-torrent-data)
-    * [.index(path, [options], [callback])](#module_locate-torrent-data.index) ⇒ <code>[FileIndex](#FileIndex)</code>
-    * [.load(source, [callback])](#module_locate-torrent-data.load) ⇒ <code>[FileIndex](#FileIndex)</code>
+    * [.index(path, [options], [callback])](#module_locate-torrent-data.index) ↩︎
+    * [.load(source, [callback])](#module_locate-torrent-data.load) ↩︎
 
 <a name="module_locate-torrent-data.index"></a>
 
-### locate-torrent-data.index(path, [options], [callback]) ⇒ <code>[FileIndex](#FileIndex)</code>
+### locate-torrent-data.index(path, [options], [callback]) ↩︎
 Create a searchable file index from the contents of specified folder(s).
 
 **Kind**: static method of <code>[locate-torrent-data](#module_locate-torrent-data)</code>  
@@ -49,7 +49,6 @@ Create a searchable file index from the contents of specified folder(s).
     - [.dereference] <code>boolean</code>
 - [callback] <code>function</code>
     - .error <code>Error</code>
-    - .fileIndex <code>[FileIndex](#FileIndex)</code>
 
 **Example**  
 ```js
@@ -58,7 +57,7 @@ var fileIndex = locateTorrentData.index("D:\\Files");
  
 <a name="module_locate-torrent-data.load"></a>
 
-### locate-torrent-data.load(source, [callback]) ⇒ <code>[FileIndex](#FileIndex)</code>
+### locate-torrent-data.load(source, [callback]) ↩︎
 Import a file index from disk or read from specified stream.
 
 **Kind**: static method of <code>[locate-torrent-data](#module_locate-torrent-data)</code>  
@@ -70,7 +69,6 @@ Import a file index from disk or read from specified stream.
 - source <code>string</code> | <code>Readable</code>
 - [callback] <code>function</code>
     - .error <code>Error</code>
-    - .fileIndex <code>[FileIndex](#FileIndex)</code>
 
 **Example**  
 ```js
@@ -82,22 +80,20 @@ var fileIndex = locateTorrentData.load("~/fileindex.csv");
 **Kind**: global class  
 
 * [FileIndex](#FileIndex)
-    * _function_
-        * [.search(torrent, [forEach], [callback])](#FileIndex+search) ⇒ <code>[FileIndex](#FileIndex)</code>
-        * [.on(event, callback)](#FileIndex+on) ⇒ <code>[FileIndex](#FileIndex)</code>
-        * [.add(path, [options], [callback])](#FileIndex+add) ⇒ <code>[FileIndex](#FileIndex)</code>
-        * [.remove(path, [callback])](#FileIndex+remove) ⇒ <code>[FileIndex](#FileIndex)</code>
-        * [.save(destination, [callback])](#FileIndex+save) ⇒ <code>[FileIndex](#FileIndex)</code>
-    * _event_
-        * ["error" (error)](#FileIndex+event_error)
-        * ["match" (file, torrent)](#FileIndex+event_match)
-        * ["notFound" (file, torrent)](#FileIndex+event_notFound)
-        * ["end" (files, torrent)](#FileIndex+event_end)
-        * ["update"](#FileIndex+event_update)
+    * [.search(torrent, [forEach], [callback])](#FileIndex+search) ↩︎
+    * [.on(event, callback)](#FileIndex+on) ↩︎
+    * [.add(path, [options], [callback])](#FileIndex+add) ↩︎
+    * [.remove(path, [callback])](#FileIndex+remove) ↩︎
+    * [.save(destination, [callback])](#FileIndex+save) ↩︎
+    * ["error" (error)](#FileIndex+event_error)
+    * ["match" (file, torrent)](#FileIndex+event_match)
+    * ["notFound" (file, torrent)](#FileIndex+event_notFound)
+    * ["end" (files, torrent)](#FileIndex+event_end)
+    * ["update"](#FileIndex+event_update)
 
 <a name="FileIndex+search"></a>
 
-### fileIndex.search(torrent, [forEach], [callback]) ⇒ <code>[FileIndex](#FileIndex)</code>
+### fileIndex.search(torrent, [forEach], [callback]) ↩︎
 Search file index for files that match the contents of specified torrent.
 
 **Kind**: instance method of <code>[FileIndex](#FileIndex)</code>  
@@ -132,7 +128,7 @@ fileIndex.search(torrent, function (file, callback) {
  
 <a name="FileIndex+on"></a>
 
-### fileIndex.on(event, callback) ⇒ <code>[FileIndex](#FileIndex)</code>
+### fileIndex.on(event, callback) ↩︎
 Add event listener.
 
 **Kind**: instance method of <code>[FileIndex](#FileIndex)</code>  
@@ -179,7 +175,7 @@ fs.readdirSync(torrentPath).forEach(function (file) {
  
 <a name="FileIndex+add"></a>
 
-### fileIndex.add(path, [options], [callback]) ⇒ <code>[FileIndex](#FileIndex)</code>
+### fileIndex.add(path, [options], [callback]) ↩︎
 Add contents of specified folder(s) to the file index.
 
 **Kind**: instance method of <code>[FileIndex](#FileIndex)</code>  
@@ -202,7 +198,7 @@ fileIndex.add("D:\\Files2");
  
 <a name="FileIndex+remove"></a>
 
-### fileIndex.remove(path, [callback]) ⇒ <code>[FileIndex](#FileIndex)</code>
+### fileIndex.remove(path, [callback]) ↩︎
 Remove contents of specified folder(s) from the file index.
 
 **Kind**: instance method of <code>[FileIndex](#FileIndex)</code>  
@@ -221,7 +217,7 @@ fileIndex.remove("D:\\Files\\Secret Files");
  
 <a name="FileIndex+save"></a>
 
-### fileIndex.save(destination, [callback]) ⇒ <code>[FileIndex](#FileIndex)</code>
+### fileIndex.save(destination, [callback]) ↩︎
 Export file index as csv file to disk at specified path or write to specified stream.
 
 **Kind**: instance method of <code>[FileIndex](#FileIndex)</code>  

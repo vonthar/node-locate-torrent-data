@@ -1,6 +1,6 @@
 {
   "name": "locate-torrent-data",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Find the location of files that match the contents of a torrent file.",
   "keywords": [
     "bittorrent",
@@ -27,9 +27,11 @@
   "main": "src/locate.js",
   "scripts": {
     "test": "nyc -n src/*.js tape test/*.js",
+    "tape": "tape test/*.js | faucet",
+    "record": "rm -rf test/fixtures && tape test/*.js",
     "coverage": "npm test && nyc report --reporter=text-lcov | coveralls",
     "lint": "eslint -c node_modules/@vonthar/pkgdev/etc/eslintrc.json src/*.js",
-    "docs": "jsdoc2md -v -p list -r list --group-by kind -t node_modules/@vonthar/pkgdev/etc/jsdoc2md.hbs src/*.js > README.md",
+    "docs": "jsdoc2md -m grouped -g grouped -p list -r list -t node_modules/@vonthar/pkgdev/etc/jsdoc2md.hbs src/*.js > README.md",
     "preversion": "npm test && git add .",
     "postversion": "git push -u origin master && git push origin master --tags && npm publish"
   },

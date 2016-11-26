@@ -37,7 +37,6 @@ var cartesianProduct = require("cartesian");
  * @param {boolean=} options.dereference
  * @param {function=} callback
  * @param {Error} callback.error
- * @returns {FileIndex}
  * @emits FileIndex#error
  * @emits FileIndex#update
  * @chainable
@@ -53,7 +52,6 @@ var cartesianProduct = require("cartesian");
  * @param {(string|Readable)} source
  * @param {function=} callback
  * @param {Error} callback.error
- * @returns {FileIndex}
  * @emits FileIndex#error
  * @emits FileIndex#update
  * @chainable
@@ -101,34 +99,34 @@ Object.defineProperties(module.exports, {
  * @global
  *//**
  * @event error
- * @memberof FileIndex.prototype
+ * @memberof FileIndex#
  * @param {Error} error
  * @see {@link FileIndex#on}
  *//**
  * @event match
- * @memberof FileIndex.prototype
+ * @memberof FileIndex#
  * @param {TorrentFile} file
  * @param {external:ParsedTorrent} torrent
  * @see {@link FileIndex#on}
  *//**
  * @event notFound
- * @memberof FileIndex.prototype
+ * @memberof FileIndex#
  * @param {TorrentFile} file
  * @param {external:ParsedTorrent} torrent
  * @see {@link FileIndex#on}
  *//**
  * @event end
- * @memberof FileIndex.prototype
+ * @memberof FileIndex#
  * @param {Array.<TorrentFile>} files
  * @param {external:ParsedTorrent} torrent
  * @see {@link FileIndex#on}
  *//**
  * @event update
- * @memberof FileIndex.prototype
+ * @memberof FileIndex#
  * @see {@link FileIndex#on}
  *//**
  * @function search
- * @memberof FileIndex.prototype
+ * @memberof FileIndex#
  * @param {(string|external:ParsedTorrent)} torrent
  * @param {function=} forEach
  * @param {TorrentFile} forEach.file
@@ -136,7 +134,6 @@ Object.defineProperties(module.exports, {
  * @param {function=} callback
  * @param {Error} callback.error
  * @param {Array.<TorrentFile>} callback.files
- * @returns {FileIndex}
  * @emits FileIndex#error
  * @emits FileIndex#match
  * @emits FileIndex#notFound
@@ -163,10 +160,9 @@ Object.defineProperties(module.exports, {
  * ```
  *//**
  * @function on
- * @memberof FileIndex.prototype
+ * @memberof FileIndex#
  * @param {string} event
  * @param {function} callback
- * @returns {FileIndex}
  * @chainable
  * @description
  * Add event listener.
@@ -206,14 +202,13 @@ Object.defineProperties(module.exports, {
  * ```
  *//**
  * @function add
- * @memberof FileIndex.prototype
+ * @memberof FileIndex#
  * @param {(string|Array.<string>)} path
  * @param {Object=} options
  * @param {number=} options.maxdepth
  * @param {boolean=} options.dereference
  * @param {function=} callback
  * @param {Error} callback.error
- * @returns {FileIndex}
  * @emits FileIndex#error
  * @emits FileIndex#update
  * @chainable
@@ -226,10 +221,9 @@ Object.defineProperties(module.exports, {
  * ```
  *//**
  * @function remove
- * @memberof FileIndex.prototype
+ * @memberof FileIndex#
  * @param {(string|Array.<string>)} path
  * @param {function=} callback
- * @returns {FileIndex}
  * @emits FileIndex#update
  * @chainable
  * @description
@@ -241,11 +235,10 @@ Object.defineProperties(module.exports, {
  * ```
  *//**
  * @function save
- * @memberof FileIndex.prototype
+ * @memberof FileIndex#
  * @param {(string|Writable)} destination
  * @param {function=} callback
  * @param {Error} callback.error
- * @returns {FileIndex}
  * @emits FileIndex#error
  * @chainable
  * @see {@link module:locate-torrent-data.load}
@@ -256,8 +249,7 @@ Object.defineProperties(module.exports, {
  * fileIndex.save("~/fileindex.csv");
  * ```
  */
-var FileIndex = {};
-Object.defineProperties(FileIndex, {
+var FileIndex = Object.create(Object, {
   search: {
     value: function (torrent, forEach, callback) {
       var self = getPrivate(this);
@@ -352,6 +344,7 @@ Object.defineProperties(FileIndex, {
         action: "remove",
         pathList: pathList,
       }, callback);
+      return this;
     }
   },
   save: {
@@ -376,12 +369,6 @@ Object.defineProperties(FileIndex, {
 
 
 /**
- * @external ParsedTorrent
- * @property {number} pieceLength
- * @property {Array.<TorrentFile>} files
- * @property {Array.<string>} pieces
- * @see {@link https://www.npmjs.com/package/parse-torrent-file}
- *//**
  * @class TorrentFile
  * @global
  * @property {number} offset - Offset of file inside torrent.
@@ -389,7 +376,8 @@ Object.defineProperties(FileIndex, {
  * @property {string} name - File name inside torrent.
  * @property {string} path - Path of file inside torrent.
  * @property {string} location - Location on disk of matching file if found.
- *//**
+ */
+/**
  * A torrent piece to be checked for file matches
  * @typedef {Object} TorrentPiece
  * @private
@@ -400,7 +388,8 @@ Object.defineProperties(FileIndex, {
  * @property {Array.<FileChunk>} chunkList
  * @property {Array.<MatchItem>} sizeMatches
  * @property {TorrentPiece=} previousPiece
- *//**
+ */
+/**
  * A file chunk that falls within a single TorrentPiece
  * @typedef {Object} FileChunk
  * @private
@@ -408,13 +397,21 @@ Object.defineProperties(FileIndex, {
  * @property {number} length
  * @property {number} position
  * @property {TorrentFile} file
- *//**
+ */
+/**
  * A file that possibly matches a FileChunk
  * @typedef {Object} MatchItem
  * @private
  * @property {number} chunkIndex
  * @property {string} path
  * @property {Buffer=} buffer
+ */
+/**
+ * @external ParsedTorrent
+ * @property {number} pieceLength
+ * @property {Array.<TorrentFile>} files
+ * @property {Array.<string>} pieces
+ * @see {@link https://www.npmjs.com/package/parse-torrent-file}
  */
 
 
