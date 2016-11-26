@@ -30,16 +30,15 @@ API Reference
 -------------
 
 * [locate-torrent-data](#module_locate-torrent-data)
-    * [.index(path, [options], [callback])](#module_locate-torrent-data.index) ↩︎
-    * [.load(source, [callback])](#module_locate-torrent-data.load) ↩︎
+    * [.index(path, [options], [callback])](#module_locate-torrent-data.index) ⇒ <code>[FileIndex](#FileIndex)</code>
+    * [.load(source, [callback])](#module_locate-torrent-data.load) ⇒ <code>[FileIndex](#FileIndex)</code>
 
 <a name="module_locate-torrent-data.index"></a>
 
-### locate-torrent-data.index(path, [options], [callback]) ↩︎
+### locate-torrent-data.index(path, [options], [callback]) ⇒ <code>[FileIndex](#FileIndex)</code>
 Create a searchable file index from the contents of specified folder(s).
 
 **Kind**: static method of <code>[locate-torrent-data](#module_locate-torrent-data)</code>  
-**Chainable**  
 **Emits**: <code>[error](#FileIndex+event_error)</code>, <code>[update](#FileIndex+event_update)</code>  
 **Params**
 
@@ -57,11 +56,10 @@ var fileIndex = locateTorrentData.index("D:\\Files");
  
 <a name="module_locate-torrent-data.load"></a>
 
-### locate-torrent-data.load(source, [callback]) ↩︎
+### locate-torrent-data.load(source, [callback]) ⇒ <code>[FileIndex](#FileIndex)</code>
 Import a file index from disk or read from specified stream.
 
 **Kind**: static method of <code>[locate-torrent-data](#module_locate-torrent-data)</code>  
-**Chainable**  
 **Emits**: <code>[error](#FileIndex+event_error)</code>, <code>[update](#FileIndex+event_update)</code>  
 **See**: [save](#FileIndex+save)  
 **Params**

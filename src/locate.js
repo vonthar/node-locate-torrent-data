@@ -39,7 +39,7 @@ var cartesianProduct = require("cartesian");
  * @param {Error} callback.error
  * @emits FileIndex#error
  * @emits FileIndex#update
- * @chainable
+ * @returns {FileIndex}
  * @description
  * Create a searchable file index from the contents of specified folder(s).
  * @example
@@ -54,7 +54,7 @@ var cartesianProduct = require("cartesian");
  * @param {Error} callback.error
  * @emits FileIndex#error
  * @emits FileIndex#update
- * @chainable
+ * @returns {FileIndex}
  * @see {@link FileIndex#save}
  * @description
  * Import a file index from disk or read from specified stream.
