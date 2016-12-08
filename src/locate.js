@@ -249,7 +249,7 @@ Object.defineProperties(module.exports, {
  * fileIndex.save("~/fileindex.csv");
  * ```
  */
-var FileIndex = Object.create(Object, {
+var FileIndex = Object.create(Object.prototype, {
   search: {
     value: function (torrent, forEach, callback) {
       var self = getPrivate(this);

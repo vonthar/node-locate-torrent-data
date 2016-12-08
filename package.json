@@ -1,6 +1,6 @@
 {
   "name": "locate-torrent-data",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Find the location of files that match the contents of a torrent file.",
   "keywords": [
     "bittorrent",
